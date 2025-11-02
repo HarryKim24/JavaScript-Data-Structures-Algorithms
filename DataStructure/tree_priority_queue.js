@@ -1,69 +1,172 @@
-// 트리
+/**
+ * Expose `PriorityQueue`.
+ */
+module.exports = PriorityQueue;
 
-/*
-  트리는 가계도와 같이 계층적인 구조를 표현할 때 사용할 수 있는 자료구조
+/**
+ * Initializes a new empty `PriorityQueue` with the given `comparator(a, b)`
+ * function, uses `.DEFAULT_COMPARATOR()` when no function is provided.
+ *
+ * The comparator function must return a positive number when `a > b`, 0 when
+ * `a == b` and a negative number when `a < b`.
+ *
+ * @param {Function}
+ * @return {PriorityQueue}
+ * @api public
+ */
+function PriorityQueue(comparator) {
+  this._comparator = comparator || PriorityQueue.DEFAULT_COMPARATOR;
+  this._elements = [];
+}
 
-  루트 노드(root node): 부모가 없는 최상위 노드
-  단말 노드(leaf node): 자식이 없는 노드
+/**
+ * Compares `a` and `b`, when `a > b` it returns a positive number, when
+ * it returns 0 and when `a < b` it returns a negative number.
+ *
+ * @param {String|Number} a
+ * @param {String|Number} b
+ * @return {Number}
+ * @api public
+ */
+PriorityQueue.DEFAULT_COMPARATOR = function(a, b) {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b;
+  } else {
+    a = a.toString();
+    b = b.toString();
 
-  깊이(depth): 루트 노드에서의 길이(length)
-  길이(length): 출발 노드에서 목적지 노드까지 거쳐야 하는 간선의 수
-  높이(height): 로트 노드에서 가장 깊은 노드까지의 길이
+    if (a == b) return 0;
 
-  이진트리(Binary Tree): 최대 2개의 자식을 가질 수 있는 트리
-  포화 이진 트리(Full Binary Tree): 리프 노드를 제외한 모든 노드가 두 자식을 가지고 있는 트리
-  완전 이진 트리(Complete Binary Tree): 모든 노드가 왼쪽 자식부터 채워진 트리
-  높이 균형 트리(Height Balanced Tree): 왼쪽 자식 트리와 오른쪽 자식 트리 높이가 1 이상 차이 나지 않는 트리
-*/
+    return (a > b) ? 1 : -1;
+  }
+};
 
+/**
+ * Returns whether the priority queue is empty or not.
+ *
+ * @return {Boolean}
+ * @api public
+ */
+PriorityQueue.prototype.isEmpty = function() {
+  return this.size() === 0;
+};
 
-// 우선순위 큐(Priority Queue)
+/**
+ * Peeks at the top element of the priority queue.
+ *
+ * @return {Object}
+ * @throws {Error} when the queue is empty.
+ * @api public
+ */
+PriorityQueue.prototype.peek = function() {
+  if (this.isEmpty()) throw new Error('PriorityQueue is empty');
 
-/*
-  우선순위 큐는 우선순위에 따라 데이터를 추출하는 자료구조
-  일반적으로 힙(heap)을 이용해 구현
-  이진트리(binary tree) 구조를 사용하는 것이 일반적
-*/
+  return this._elements[0];
+};
 
+/**
+ * Dequeues the top element of the priority queue.
+ *
+ * @return {Object}
+ * @throws {Error} when the queue is empty.
+ * @api public
+ */
+PriorityQueue.prototype.deq = function() {
+  var first = this.peek();
+  var last = this._elements.pop();
+  var size = this.size();
 
-// 힙(heap)
+  if (size === 0) return first;
 
-/*
-  힙은 원소들 중에서 최댓값 혹은 최솟값을 빠르게 찾아내는 완전 이진 트리 자료구조
-  우선순위가 높은 노드가 루트(root)에 위치
-  힙은 원소의 삽입과 삭제를 위해 O(logN)의 수행 시간을 요구
+  this._elements[0] = last;
+  var current = 0;
 
-  1. 최대 힙(max heap)
-    - 부모 노드의 키 값이 자식 노드의 키 값보다 항상 큼
-    - 루트 노드가 가장 크며, 값이 큰 데이터가 우선순위를 가짐
-  2. 최소 힙(min heap)
-    - 부모 노드의 키 값이 자식 노드의 키 값보다 항상 작음
-    - 루트 노드가 가장 작으며, 값이 작은 데이터가 우선순위를 가짐
+  while (current < size) {
+    var largest = current;
+    var left = (2 * current) + 1;
+    var right = (2 * current) + 2;
 
-  최소 힙 구성 함수: Heapify
-    - 부모로 거슬러 올라가며, 부모보다 자신이 더 작은 경우에 위치를 교체
-*/
+    if (left < size && this._compare(left, largest) >= 0) {
+      largest = left;
+    }
 
+    if (right < size && this._compare(right, largest) >= 0) {
+      largest = right;
+    }
 
-// JavaScript의 힙(Heap) 라이브러리
+    if (largest === current) break;
 
-/*
-  - https://github.com/ndb796/priorityqueuejs
-  - index.js 소스 코드를 가져와서 사용
-*/
+    this._swap(largest, current);
+    current = largest;
+  }
 
+  return first;
+};
 
-// 최대힙(Max Heap)
-const PriorityQueue = require("./tree_priority_queue_import");
+/**
+ * Enqueues the `element` at the priority queue and returns its new size.
+ *
+ * @param {Object} element
+ * @return {Number}
+ * @api public
+ */
+PriorityQueue.prototype.enq = function(element) {
+  var size = this._elements.push(element);
+  var current = size - 1;
 
-let pq = new PriorityQueue(function(a, b) {
-  return a.cash - b.cash;
-});
+  while (current > 0) {
+    var parent = Math.floor((current - 1) / 2);
 
-pq.enq({ cash: 250, name: 'Doohyun Kim' });
-pq.enq({ cash: 300, name: 'Gildong Hong' });
-pq.enq({ cash: 150, name: 'Minchul Han' });
-console.log(pq.size()); // 3
-console.log(pq.deq()); // { cash: 300, name: 'Gildong Hong' }
-console.log(pq.peek()); // { cash: 250, name: 'Doohyun Kim' }
-console.log(pq.size()); // 2
+    if (this._compare(current, parent) <= 0) break;
+
+    this._swap(parent, current);
+    current = parent;
+  }
+
+  return size;
+};
+
+/**
+ * Returns the size of the priority queue.
+ *
+ * @return {Number}
+ * @api public
+ */
+PriorityQueue.prototype.size = function() {
+  return this._elements.length;
+};
+
+/**
+ *  Iterates over queue elements
+ *
+ *  @param {Function} fn
+ */
+PriorityQueue.prototype.forEach = function(fn) {
+  return this._elements.forEach(fn);
+};
+
+/**
+ * Compares the values at position `a` and `b` in the priority queue using its
+ * comparator function.
+ *
+ * @param {Number} a
+ * @param {Number} b
+ * @return {Number}
+ * @api private
+ */
+PriorityQueue.prototype._compare = function(a, b) {
+  return this._comparator(this._elements[a], this._elements[b]);
+};
+
+/**
+ * Swaps the values at position `a` and `b` in the priority queue.
+ *
+ * @param {Number} a
+ * @param {Number} b
+ * @api private
+ */
+PriorityQueue.prototype._swap = function(a, b) {
+  var aux = this._elements[a];
+  this._elements[a] = this._elements[b];
+  this._elements[b] = aux;
+};
