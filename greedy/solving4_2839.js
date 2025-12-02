@@ -12,7 +12,7 @@ let n = Number(input[0]);
 let cnt = 0;
 let flag = false;
 
-while(n) {
+while(n >= 0) {
   if (n == 0 || n % 5 == 0) {
     cnt += Math.floor(n / 5);
     console.log(cnt);
