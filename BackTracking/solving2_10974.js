@@ -17,7 +17,7 @@ let visited = Array(n).fill(false);
 let selected = [];
 let result = '';
 
-function bfs(arr, depth) {
+function dfs(arr, depth) {
   if (depth == n) {
     result += selected.join(' ') + '\n';
     return;
@@ -27,10 +27,10 @@ function bfs(arr, depth) {
     if (visited[i]) continue;
     selected.push(arr[i]);
     visited[i] = true;
-    bfs(arr, depth + 1);
+    dfs(arr, depth + 1);
     selected.pop();
     visited[i] = false;
   }
 }
-bfs(arr, 0);
+dfs(arr, 0);
 console.log(result);
